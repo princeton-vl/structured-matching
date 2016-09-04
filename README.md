@@ -4,7 +4,7 @@ Created by Mingzhe Wang at University of Michigan, Ann Arbor.
 
 This is released codes used for:
 
-Mingzhe Wang, Mahmoud Azab, Noriyuki Kojima, Rada Mihalcea, Jia Deng
+Mingzhe Wang, Mahmoud Azab, Noriyuki Kojima, Rada Mihalcea, Jia Deng,
 **Structured Matching for Phrase Localization**,
 ECCV 2016. [paper](http://web.eecs.umich.edu/~jiadeng/paper/WangEtAl_ECCV2016.pdf)
 
