@@ -81,6 +81,6 @@ The folowing tools are used to features in our experiments:
 
 Please let me know if you have any issues about our codes.
 
-## Acknowledgements ## 
+## Acknowledgements ##
 
 Thanks to Geoff Leyland for providing an excellent implementation of simplex algorithms in lua.
