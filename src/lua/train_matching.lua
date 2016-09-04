@@ -4,14 +4,13 @@ require 'hdf5'
 import 'matching_loss.lua'
 
 cmd = torch.CmdLine()
-cmd:option('-lr' , 0.1)
-cmd:option('-lrd' , 0.0002)
-cmd:option('-batch' , 250)
-cmd:option('-margin' , 0)
-cmd:option('-lamda' , 0)
-cmd:option('-file' , '../../workspace/model/')
+cmd:option('-lr' , 0.1) --learinig rate
+cmd:option('-lrd' , 0.0002) --learning rate decay
+cmd:option('-batch' , 250) --batch size
+cmd:option('-margin' , 0) --  margin, not used
+cmd:option('-file' , '../../workspace/model/') --output path
 params = cmd:parse(arg)
-params.lr = params.lr/100
+params.lr = params.lr/100 -- careful!! 
 if not path.exists(params.file) then 
 	os.execute("mkdir" .. params.file)
 end
@@ -20,7 +19,7 @@ print(params)
 imgset = {0,10000,20000,29783}
 img = 1
 sen = 1
-function load_image_feat()
+function load_image_feat() -- load features for gt bbox
 	local fn = string.format('../../workspace/train/feat_vgg_nv_%d.h5' , sen)
 	local file = hdf5.open(fn , 'r')
 	local data = file:read('feat_vgg'):all()
@@ -28,7 +27,7 @@ function load_image_feat()
 	file:close()
 	return data:double()
 end
-function load_phrase_feat()
+function load_phrase_feat() -- load features for phrases
 	local fn = string.format('../../workspace/train/feat_nv_pv%d.mat' , sen)
         local file = hdf5.open(fn , 'r')
         local data = file:read('feat_pv_pca'):all()
@@ -36,7 +35,7 @@ function load_phrase_feat()
         file:close()
         return data:transpose(2,1):double()
 end
-function load_idx()
+function load_idx() --load index of bbox and phrases
 	local file1 = hdf5.open('../../workspace/train/train_nv_sen_idx.mat' , 'r')
 	local data1 = file1:read('new_sen_idx'):all():transpose(2,1)
 	print (#data1)
@@ -55,7 +54,7 @@ function load_idx()
 	end
 	return idx1 , idx2
 end
-function load_gt()
+function load_gt() -- load gt matching
 	local fn = string.format('../../workspace/train/gt_nv_%d.h5' , sen)
 	local file = hdf5.open(fn , 'r')
 	local data = file:read('gt'):all()
@@ -63,7 +62,7 @@ function load_gt()
 	file:close()
 	return data
 end
-function load_box()
+function load_box() --load bbox as nagetive examples
 	local fn = string.format('../../workspace/train/feat_vgg_bbox%d.h5',imgset[img+1])
 	local file = hdf5.open(fn , 'r')
 	local data = file:read('feat_vgg_box'):all()
@@ -71,7 +70,7 @@ function load_box()
 	file:close()
 	return data
 end
-function load_cca()
+function load_cca() -- laod cca for initialization
 	local file = hdf5.open('../../workspace/train/cca_h5.mat', 'r')
 	local wpv,wvgg,ccar,meanpv,meanvgg
 	wpv = file:read('wx'):all():transpose(2,1)
@@ -92,30 +91,16 @@ function load_filter_idx()
 	file:close()
 	return box_idx , box_idx_idx
 end
---load data
---train_vgg = load_image_feat()
---train_pv = load_phrase_feat()
---pv_idx,img_idx = load_idx()
---gt = load_gt()
---box_vgg = load_box()
+
+--global parameters
 wpv,wvgg,meanpv,meanvgg = load_cca()
 box_idx,box_idx_idx = load_filter_idx()
---train_vgg = torch.rand(10000,2000)
---train_pv = torch.rand(10000,2000)
---box_vgg = torch.rand(500,100,2000)
-
---train_vgg = torch.rand(10000 , 2000)
---train_pv = torch.rand(10000 , 2000)
 dim_img = 4096
 dim_pv = 6000
---num_sample = box_vgg:size()[1]
-
---taining settings
 maxIter = 40
 batch_size = params.batch
---num_batch = torch.floor((num_sample-1)/batch_size)+1
 loss = 0
-margin = params.margin --margin as weight of hamming distance or margin for max
+margin = params.margin --margin as weight of hamming distance or margin for max, not used
 min_lr = 0.00025
 sgd_params =
 {
@@ -134,32 +119,25 @@ l1.bias:fill(0)
 l2.bias:fill(0)
 img_mlp = nn.Sequential()
 img_mlp:add(l1)
---img_mlp:add(nn.BatchNormalization(4096))
 img_mlp:add(nn.Normalize(2))
 
 pv_mlp = nn.Sequential();
 pv_mlp:add(l2)
---pv_mlp:add(nn.BatchNormalization(4096))
 pv_mlp:add(nn.Normalize(2))
 
 prl = nn.ParallelTable()
 prl:add(img_mlp)
 prl:add(pv_mlp)
---file = torch.DiskFile('../../output/simple_net_0.020000_0.000000_40.asc')
---prl = file:readObject()
 
 loss_function = nn.matching_loss(params.margin , params.lamda)
---mlp = nn.Sequential()
---mlp:add(prl)
---mlp:add(nn.simple_loss(margin))
+
 --global variables for batch and optim
 pos = 0
 start_pos = 1
 end_pos = 10000
 x_data, dl_dx = prl:getParameters()
---train (1)batch (2)weight decay (3)momentum
 
-function nextBatch()
+function nextBatch() --fetch a batch for training
 	local l = pos+1
 	local r = torch.min(torch.Tensor({pos+batch_size , num_sample}))
 	local num_img = (r-l+1)*100 + torch.sum(img_idx:index(1,idx[{{l,r}}]+1))-torch.sum(img_idx:index(1,idx[{{l,r}}]))
@@ -215,7 +193,7 @@ feval = function(x_new)
 	prl:backward({ix,iy} , loss_function:backward({pred,idxx,idxy,gtb}))
 	return loss_x , dl_dx
 end
-function delete_nonvisual()
+function delete_nonvisual() --delete overlaped bounding boxes
 	--pv_idx gt train_pv
 	local v_idx = torch.Tensor(gt:size())
 	local len,cnt = 0,0
@@ -237,9 +215,11 @@ function delete_nonvisual()
 	gt = gt:index(1,v_idx:long())
 	pv_idx:copy(pv_idx_new)
 end
+
+--training procedure
 cnt = 0
-for i = 1,maxIter do
-for ii = 1,2 do
+for i = 1,maxIter do --for images
+for ii = 1,2 do --for sentences
 sen = ii
 train_vgg = load_image_feat()
 train_pv = load_phrase_feat()
@@ -257,7 +237,6 @@ for k = 1,3 do
 	tp,all = 0,0
 	for j = 1,num_batch do
 		_, fs = optim.sgd(feval , x_data , sgd_params)
-		--sgd_params.learningRate = params.lr/(1+cnt*params.lrd)
 		cnt = cnt+1
 		tp = loss_function.tpv+tp
 		all = loss_function.allv+all
@@ -266,10 +245,6 @@ for k = 1,3 do
 			tp = 0
 			all = 0
 			loss = 0
-			--sgd_params.learningRate = params.lr*(1-cnt/maxIter/num_batch)
-			--if sgd_params.learningRate<min_lr then
-			--	sgd_params.learningRate=min_lr
-			--end
 		end
 	end
 	print ('iteration:' , i , sen , img , loss , sgd_params.learningRate)

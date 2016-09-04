@@ -1,3 +1,4 @@
+-- loss function for bipartite matching
 require 'nn'
 require 'solver.lua'
 local matching_loss, parent = torch.class('nn.matching_loss', 'nn.Module')

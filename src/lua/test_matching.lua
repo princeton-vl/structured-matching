@@ -1,9 +1,10 @@
+-- test code for bipartite matching
 require 'nn'
 require 'hdf5'
 import 'matching_loss.lua'
 
 cmd = torch.CmdLine()
-cmd:option('-file' , '../../workspace/model/mat.asc')
+cmd:option('-file' , '../../workspace/model/matching.asc')
 params = cmd:parse(arg)
 print(params)
 method = 'matching'

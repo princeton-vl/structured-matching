@@ -1,3 +1,4 @@
+-- solver for bipartite matching in simplex as LP
 luasimplex = require("luasimplex")
 rsm = require("luasimplex.rsm")
 

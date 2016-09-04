@@ -1,3 +1,4 @@
+-- solver for structured matching in simplex
 luasimplex = require("luasimplex")
 rsm = require("luasimplex.rsm")
 

@@ -1,3 +1,4 @@
+-- loss function for structured matching
 require 'nn'
 require 'solver_pc_train.lua'
 local matching_loss, parent = torch.class('nn.matching_loss', 'nn.Module')

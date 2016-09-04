@@ -1,3 +1,4 @@
+-- test code for structured matching
 require 'nn'
 require 'hdf5'
 import 'solver_pc_test.lua'

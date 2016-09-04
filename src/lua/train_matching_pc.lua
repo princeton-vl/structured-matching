@@ -4,12 +4,12 @@ require 'hdf5'
 import 'matching_loss_pc.lua'
 
 cmd = torch.CmdLine()
-cmd:option('-lr' , 0.01)
-cmd:option('-lrd' , 0.0002)
-cmd:option('-batch' , 250)
-cmd:option('-margin' , 0)
-cmd:option('-lamda' , 0.2)
-cmd:option('-file' , '../../workspace/model/')
+cmd:option('-lr' , 0.01) -- learning rate
+cmd:option('-lrd' , 0.0002) -- lr decay
+cmd:option('-batch' , 250) -- batch size
+cmd:option('-margin' , 0)  
+cmd:option('-lamda' , 0.1) -- weight of relations
+cmd:option('-file' , '../../workspace/model/') -- output path
 params = cmd:parse(arg)
 params.lr = params.lr/100
 print(params)
@@ -22,7 +22,7 @@ img = 1
 sen = 1
 splist = {9}
 num_cls = #splist
-function load_image_feat()
+function load_image_feat() -- load gt bbox
 	local fn = string.format('../../workspace/train/feat_vgg_nv_%d.h5' , sen)
 	local file = hdf5.open(fn , 'r')
 	local data = file:read('feat_vgg'):all()
@@ -30,7 +30,7 @@ function load_image_feat()
 	file:close()
 	return data:double()
 end
-function load_phrase_feat()
+function load_phrase_feat() -- load gt phrases
 	local fn = string.format('../..//workspace/train/feat_nv_pv%d.mat' , sen)
         local file = hdf5.open(fn , 'r')
         local data = file:read('feat_pv_pca'):all()
@@ -38,7 +38,7 @@ function load_phrase_feat()
         file:close()
         return data:transpose(2,1):double()
 end
-function load_idx()
+function load_idx() -- load index
 	local file1 = hdf5.open('../../workspace/train/train_nv_sen_idx.mat' , 'r')
 	local data1 = file1:read('new_sen_idx'):all():transpose(2,1)
 	print (#data1)
@@ -57,7 +57,7 @@ function load_idx()
 	end
 	return idx1 , idx2
 end
-function load_gt()
+function load_gt() -- load gt matching 
 	local fn = string.format('../../workspace/train/gt_nv_%d.h5' , sen)
 	local file = hdf5.open(fn , 'r')
 	local data = file:read('gt'):all()
@@ -65,7 +65,7 @@ function load_gt()
 	file:close()
 	return data
 end
-function load_box()
+function load_box() -- load bbox from edgebox
 	local fn = string.format('../../workspace/train/feat_vgg_bbox%d.h5',imgset[img+1])
 	local file = hdf5.open(fn , 'r')
 	local data = file:read('feat_vgg_box'):all()
@@ -94,7 +94,7 @@ function load_filter_idx()
 	file:close()
 	return box_idx , box_idx_idx
 end
-function load_sp()                                             
+function load_sp() -- load relations                                            
         local file = hdf5.open('../../workspace/train/trainsp.mat','r')
         local posgeo = file:read('spposgeo'):all():transpose(2,1)
         local neggeo = file:read('spneggeo'):all():transpose(2,1)
@@ -108,7 +108,7 @@ function load_sp()
         file:close()
         return posgeo,neggeo,posidx,negidx,poscnt,negcnt,sen2pvidx
 end
-function relation4sen()
+function relation4sen() -- construct a struct for relations.
 	local sp4sen_cnt = torch.zeros(29783,5)
 	local sp4sen = {}
 	local img,sen,p1,p2
@@ -133,35 +133,22 @@ function relation4sen()
 	return sp4sen,sp4sen_cnt 
 end
 --load data
---train_vgg = load_image_feat()
---train_pv = load_phrase_feat()
---pv_idx,img_idx = load_idx()
---gt = load_gt()
---box_vgg = load_box()
 posgeo,neggeo,posidx,negidx,poscnt,negcnt,sen2pvidx = load_sp()
 wpv,wvgg,meanpv,meanvgg = load_cca()
 box_idx,box_idx_idx = load_filter_idx()
-sp4sen,sp4sen_cnt = relation4sen()
-file = torch.DiskFile('../../workspace/train/logis_cnn.asc')
+sp4sen,sp4sen_cnt = relation4sen() --sp4sen represents relations
+file = torch.DiskFile('../../workspace/train/logis_cnn.asc') -- locd pretrained logistic regression
 logis_cnn = file:readObject()
 file:close()
-file = torch.DiskFile('../../workspace/train/sen2imgidx.asc')
+file = torch.DiskFile('../../workspace/train/sen2imgidx.asc') -- load reverse index
 sen2imgidx = file:readObject()
 file:close()
---train_vgg = torch.rand(10000,2000)
---train_pv = torch.rand(10000,2000)
---box_vgg = torch.rand(500,100,2000)
-
---train_vgg = torch.rand(10000 , 2000)
---train_pv = torch.rand(10000 , 2000)
 dim_img = 4096
 dim_pv = 6000
---num_sample = box_vgg:size()[1]
 
 --taining settings
 maxIter = 40
 batch_size = params.batch
---num_batch = torch.floor((num_sample-1)/batch_size)+1
 loss = 0
 margin = params.margin --margin as weight of hamming distance or margin for max
 min_lr = 0.00025
@@ -182,32 +169,24 @@ l1.bias:fill(0)
 l2.bias:fill(0)
 img_mlp = nn.Sequential()
 img_mlp:add(l1)
---img_mlp:add(nn.BatchNormalization(4096))
 img_mlp:add(nn.Normalize(2))
 
 pv_mlp = nn.Sequential();
 pv_mlp:add(l2)
---pv_mlp:add(nn.BatchNormalization(4096))
 pv_mlp:add(nn.Normalize(2))
 
 prl = nn.ParallelTable()
 prl:add(img_mlp)
 prl:add(pv_mlp)
---file = torch.DiskFile('../../output/simple_net_0.020000_0.000000_40.asc')
---prl = file:readObject()
 
 loss_function = nn.matching_loss(params.lamda)
---mlp = nn.Sequential()
---mlp:add(prl)
---mlp:add(nn.simple_loss(margin))
---global variables for batch and optim
 pos = 0
 start_pos = 1
 end_pos = 10000
 x_data, dl_dx = prl:getParameters()
 --train (1)batch (2)weight decay (3)momentum
 
-function nextBatch()
+function nextBatch() -- fetch a batch for training
 	local l = pos+1
 	local r = torch.min(torch.Tensor({pos+batch_size , num_sample}))
 	local num_img = (r-l+1)*100 + torch.sum(img_idx:index(1,idx[{{l,r}}]+1))-torch.sum(img_idx:index(1,idx[{{l,r}}]))
@@ -251,7 +230,7 @@ function nextBatch()
 	gtb = gtb[{{1,cnt_pv}}]
 	return ix,iy,idxx,idxy,gtb,bidx
 end
-function cal_score(pred,ix,idxx,idxy,gtb,bidx)
+function cal_score(pred,ix,idxx,idxy,gtb,bidx) -- calculate the relations score of logis regression
 	local score = {}
 	local ip,sp,l1,l2,r1,r2,r,p1,p2,b1,b2,im,num_r,_b1,_b2,t1,t2
 	local num_b = idxx:size()[1]
@@ -315,8 +294,6 @@ feval = function(x_new)
 	end
 	local ix,iy,idxx,idxy,gtb,bidx = nextBatch()
 	dl_dx:zero()
-	--ix = ix-torch.expand(meanvgg,ix:size())
-	--iy = iy-torch.expand(meanpv,iy:size())
     	--cal W for each pair, find all the sp, each generate a set of sp score fsp, pass them into loss(as a table)
 	local pred = prl:forward({ix,iy})
 	local score,featsp,rtype = cal_score(pred,ix,idxx,idxy,gtb,bidx)
@@ -355,6 +332,8 @@ function delete_nonvisual()
 	gt = gt:index(1,v_idx:long())
 	pv_idx:copy(pv_idx_new)
 end
+
+-- training procedure
 cnt = 0
 for i = 1,maxIter do
 for ii = 1,2 do
@@ -375,7 +354,6 @@ for k = 1,3 do
 	tp,all = 0,0
 	for j = 1,num_batch do
 		_, fs = optim.sgd(feval , x_data , sgd_params)
-		--sgd_params.learningRate = params.lr/(1+cnt*params.lrd)
 		cnt = cnt+1
 		tp = loss_function.tpv+tp
 		all = loss_function.allv+all
@@ -384,10 +362,6 @@ for k = 1,3 do
 			tp = 0
 			all = 0
 			loss = 0
-			--sgd_params.learningRate = params.lr*(1-cnt/maxIter/num_batch)
-			--if sgd_params.learningRate<min_lr then
-			--	sgd_params.learningRate=min_lr
-			--end
 		end
 	end
 	print ('iteration:' , i , sen , img , loss , sgd_params.learningRate)
