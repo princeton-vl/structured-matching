@@ -29,7 +29,7 @@ Download features extracted from testset:
 
 To evaluate model of bipartite matching:
 
-`cd src/lua`
+`cd ../src/lua`
 
 `th test_matching.lua`
 
@@ -37,7 +37,7 @@ The predicted bounding boxes and corresponding scores are stored in `workspace/m
 
 `p=runEval_arg('../../workspace/matching')`
 
-To specify test file, add parameter `-file`. To evaluate model of structured matching:
+To specify test file, add arguments `-file`. To evaluate model of structured matching:
 
 `cd ../lua`
 
@@ -48,3 +48,39 @@ The predicted bounding boxes and corresponding scores are stored in `workspace/m
 `p=runEval_arg('../../workspace/matching_pc')`
 
 In all experiments, we reported Recall@1 in our ECCV paper.
+
+To train your own models, you need generate features for phrases and bounding boxes. You can download our features (63G) by:
+
+`cd workspace/`
+
+`./fetch_train_feat.sh`
+
+Then go into `src/lua` and run:
+
+`th train_matching.lua`
+
+to train a model for bipartite matching, or run:
+
+`th train_matching_pc.lua`
+
+to train a model for structured matching. Trained models are output to `workspace/model`. Please refer to commends to adjust learning parameters.
+
+To generate your own features, you need 
+
+- Download [Flickr30k](http://shannon.cs.illinois.edu/DenotationGraph/) dataset.
+- Download [Flickr30kEntities](http://web.engr.illinois.edu/~bplumme2/Flickr30kEntities/) dataset.
+- Generate bounding boxes.
+- Extract features for bbox.
+- Extract features for phrases.
+
+The folowing tools are used to features in our experiments:
+
+- [Edgebox](https://github.com/pdollar/edges) (generate bounding boxes)
+- [Fast-rcnn](https://github.com/rbgirshick/fast-rcnn) (image features)
+- [Fisher vector](https://owncloud.cs.tau.ac.il/index.php/s/vb7ys8Xe8J8s8vo) (textual features)
+
+Please let me know if you have any issues about our codes.
+
+## Acknowledgements ## 
+
+Thanks to Geoff Leyland for providing an excellent implementation of simplex algorithms in lua.
