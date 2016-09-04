@@ -27,12 +27,24 @@ Download features extracted from testset:
 
 `./fetch_test_feat.sh`
 
-`cd ..`
-
 To evaluate model of bipartite matching:
 
-`th src/lua/test_matching.lua`
+`cd src/lua`
+
+`th test_matching.lua`
+
+The predicted bounding boxes and corresponding scores are stored in `workspace/matching/`. Open matlab and run evaluation [codes]() from Bryan A. Plummer et al:
+
+`p=runEval_arg('../../workspace/matching')`
 
 To specify test file, add parameter `-file`. To evaluate model of structured matching:
 
-`th src/lua/test_pc.lua`
+`cd ../lua`
+
+`th test_pc.lua`
+
+The predicted bounding boxes and corresponding scores are stored in `workspace/matching_pc`
+
+`p=runEval_arg('../../workspace/matching_pc')`
+
+In all experiments, we reported Recall@1 in our ECCV paper.
