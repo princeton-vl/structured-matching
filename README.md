@@ -33,7 +33,7 @@ To evaluate model of bipartite matching:
 
 `th test_matching.lua`
 
-The predicted bounding boxes and corresponding scores are stored in `workspace/matching/`. Open matlab and run evaluation [codes]() from Bryan A. Plummer et al:
+The predicted bounding boxes and corresponding scores are stored in `workspace/matching/`. Open matlab and run evaluation [codes](http://web.engr.illinois.edu/~bplumme2/Flickr30kEntities/Flickr30kPhraseLocalizationEval.tar.gz) from Bryan A. Plummer et al:
 
 `p=runEval_arg('../../workspace/matching')`
 
@@ -63,7 +63,7 @@ to train a model for bipartite matching, or run:
 
 `th train_matching_pc.lua`
 
-to train a model for structured matching. Trained models are output to `workspace/model`. Please refer to commends to adjust learning parameters.
+to train a model for structured matching. Output models are stored in `workspace/model`. Please refer to commends to adjust learning parameters.
 
 To generate your own features, you need 
 
