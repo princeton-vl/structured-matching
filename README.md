@@ -28,3 +28,11 @@ Download features extracted from testset:
 `./fetch_test_feat.sh`
 
 `cd ..`
+
+To evaluate model of bipartite matching:
+
+`th src/lua/test_matching.lua`
+
+To specify test file, add parameter `-file`. To evaluate model of structured matching:
+
+`th src/lua/test_pc.lua`
