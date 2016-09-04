@@ -2,7 +2,7 @@
 
 Created by Mingzhe Wang at University of Michigan, Ann Arbor.
 
-This is released codes used for:
+This is released code for:
 
 Mingzhe Wang, Mahmoud Azab, Noriyuki Kojima, Rada Mihalcea, Jia Deng,
 **Structured Matching for Phrase Localization**,
@@ -38,7 +38,7 @@ The predicted bounding boxes and corresponding scores are stored in `workspace/m
 
 `p=runEval_arg('../../workspace/matching')`
 
-To specify test file, add arguments `-file`. To evaluate model of structured matching:
+To specify the test file, add arguments `-file`. To evaluate the model of structured matching:
 
 `cd ../lua`
 
@@ -74,7 +74,7 @@ To generate your own features, you need
 - Extract features for bbox.
 - Extract features for phrases.
 
-The folowing tools are used to features in our experiments:
+The following tools are used to features in our experiments:
 
 - [Edgebox](https://github.com/pdollar/edges) (generate bounding boxes)
 - [Fast-rcnn](https://github.com/rbgirshick/fast-rcnn) (image features)
