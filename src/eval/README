@@ -1,0 +1,48 @@
+/****************************************************************************
+
+Flickr30k Entities Evaluation Code
+
+Code to evaluate phrase localization in the manner of the following paper:
+
+Bryan A. Plummer, Liwei Wang, Chris M. Cervantes, Juan C. Caicedo, Julia 
+Hockenmaier, and Svetlana Lazebnik, Flickr30k Entities: Collecting 
+Region-to-Phrase Correspondences for Richer Image-to-Sentence Models,ICCV,2015.
+
+*****************************************************************************/
+
+Version 1.0
+
+For an example of how to use this package, please see the runEval.m script.
+
+The code assumes you have created a directory with all predictions you have 
+made output to disk.  These file names should have the following format:
+
+<image>_<sentence number>_<phrase number>.txt
+
+The sentence/phrase number use the ordering produced by the getSentenceData.m 
+function that is packaged along with the dataset.  Each file should have the 
+bounding box predictions in the following format:
+
+confidence x1 y1 x2 y2
+
+Only one prediction per line, so if you had 3 predictions for a phrase it 
+would look like:
+
+0.702566 103 96 177 173
+0.733380 51 96 269 369
+0.734488 83 95 220 372
+
+See the directory hglmm_vgg19_cca_predictions for more examples.  This 
+directory contains the output files for each of the test images using the CCA 
+model trained as described in our paper.
+
+The code also uses the phraseList.txt file.  Each row of this file has 5 
+components,
+
+<image> <sentence number> <phrase number> <parsed phrase match> <phrase>
+
+The first three items are the same as the prediction filenames. The forth 
+item is a binary value indicating if we were able to match the phrase with a 
+noun phrase found using the Stanford Parser.  The last component contains the 
+nouns, adjectives, prepositions, and cardinal numbers greater than one of a 
+phrase and is what the WordEval file uses as labels. 
