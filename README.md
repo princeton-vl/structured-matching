@@ -24,47 +24,47 @@ Download our pretrained model:
 
 `./fetch_model.sh`
 
-Download features extracted from testset:
+Download features of test data:
 
 `./fetch_test_feat.sh`
 
-To evaluate model of bipartite matching:
+To evaluate the model of bipartite matching:
 
 `cd ../src/lua`
 
 `th test_matching.lua`
 
-The predicted bounding boxes and corresponding scores are stored in `workspace/matching/`. Open matlab and run evaluation [codes](http://web.engr.illinois.edu/~bplumme2/Flickr30kEntities/Flickr30kPhraseLocalizationEval.tar.gz) from Bryan A. Plummer et al:
+The predictions of bounding boxes and corresponding scores are stored in `workspace/matching/`. Open matlab and run evaluation [codes](http://web.engr.illinois.edu/~bplumme2/Flickr30kEntities/Flickr30kPhraseLocalizationEval.tar.gz) from Bryan A. Plummer et al:
 
 `p=runEval_arg('../../workspace/matching')`
 
-To specify the test file, add arguments `-file`. To evaluate the model of structured matching:
+To specify a test file, run with `-file test-model`. To evaluate the model of structured matching:
 
 `cd ../lua`
 
 `th test_pc.lua`
 
-The predicted bounding boxes and corresponding scores are stored in `workspace/matching_pc`
+The predictions of bounding boxes and corresponding scores are stored in `workspace/matching_pc`
 
 `p=runEval_arg('../../workspace/matching_pc')`
 
 In all experiments, we reported Recall@1 in our ECCV paper.
 
-To train your own models, you need generate features for phrases and bounding boxes. You can download our features (63G) by:
+To train your own models, you need to extract features for phrases and bounding boxes. You can download our features (63G) with the following commands:
 
 `cd workspace/`
 
 `./fetch_train_feat.sh`
 
-Then go into `src/lua` and run:
+To train a model with bipartite matching, in the `src/lua` folder, run:
 
 `th train_matching.lua`
 
-to train a model for bipartite matching, or run:
+To train a model with structured matching, run:
 
 `th train_matching_pc.lua`
 
-to train a model for structured matching. Output models are stored in `workspace/model`. Please refer to commends to adjust learning parameters.
+Output models are stored in `workspace/model`. Please refer to comments to adjust learning parameters.
 
 To generate your own features, you need 
 
