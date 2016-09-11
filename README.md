@@ -50,7 +50,7 @@ The predictions of bounding boxes and corresponding scores are stored in `worksp
 
 In all experiments, we reported Recall@1 in our ECCV paper.
 
-To train your own models, you need to extract features for phrases and bounding boxes. You can download our features (63G) with the following commands:
+To train your own models, you need to extract features for both phrases and bounding boxes. You can also download our features (63G) with the following commands:
 
 `cd workspace/`
 
@@ -71,10 +71,10 @@ To generate your own features, you need to
 - Download [Flickr30k](http://shannon.cs.illinois.edu/DenotationGraph/) dataset.
 - Download [Flickr30kEntities](http://web.engr.illinois.edu/~bplumme2/Flickr30kEntities/) dataset.
 - Generate bounding boxes.
-- Extract features for bbox.
+- Extract features for bounding boxes.
 - Extract features for phrases.
 
-The following tools are used to features in our experiments:
+The following tools were used to extract features in our experiments:
 
 - [Edgebox](https://github.com/pdollar/edges) (generate bounding boxes)
 - [Fast-rcnn](https://github.com/rbgirshick/fast-rcnn) (image features)
