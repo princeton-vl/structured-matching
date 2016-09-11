@@ -34,7 +34,7 @@ To evaluate the model of bipartite matching:
 
 `th test_matching.lua`
 
-The predictions of bounding boxes and corresponding scores are stored in `workspace/matching/`. Open matlab and run evaluation [codes](http://web.engr.illinois.edu/~bplumme2/Flickr30kEntities/Flickr30kPhraseLocalizationEval.tar.gz) from Bryan A. Plummer et al:
+The predictions of bounding boxes and corresponding scores are stored in `workspace/matching/`. Open matlab and run evaluation [code](http://web.engr.illinois.edu/~bplumme2/Flickr30kEntities/Flickr30kPhraseLocalizationEval.tar.gz) from Bryan A. Plummer et al:
 
 `p=runEval_arg('../../workspace/matching')`
 
@@ -64,9 +64,9 @@ To train a model with structured matching, run:
 
 `th train_matching_pc.lua`
 
-Output models are stored in `workspace/model`. Please refer to comments to adjust learning parameters.
+Output models are stored in `workspace/model`. Please refer to the comments in `train_matching_pc.lua` to adjust learning parameters.
 
-To generate your own features, you need 
+To generate your own features, you need to 
 
 - Download [Flickr30k](http://shannon.cs.illinois.edu/DenotationGraph/) dataset.
 - Download [Flickr30kEntities](http://web.engr.illinois.edu/~bplumme2/Flickr30kEntities/) dataset.
@@ -80,7 +80,7 @@ The following tools are used to features in our experiments:
 - [Fast-rcnn](https://github.com/rbgirshick/fast-rcnn) (image features)
 - [Fisher vector](https://owncloud.cs.tau.ac.il/index.php/s/vb7ys8Xe8J8s8vo) (textual features)
 
-Please let me know if you have any issues about our codes.
+Please let me know if you have any issues about our code.
 
 ## Acknowledgements ##
 
